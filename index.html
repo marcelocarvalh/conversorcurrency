@@ -80,7 +80,7 @@
 
     <script>
         const apiKey = '70b22af1f12a9d0ff553cee4208f5630'; // Replace with your Exchange Rates API key
-        const apiURL = 'https://api.apilayer.com/exchangerates_data/rates';
+        const apiURL = 'https://api.apilayer.com/exchangerates_data/latest';
 
         const amountInput = document.getElementById('amount');
         const fromCurrency = document.getElementById('from-currency');
@@ -109,6 +109,9 @@
                     optionTo.textContent = currency;
                     toCurrency.appendChild(optionTo);
                 });
+                fromCurrency.value = 'USD'; // Moeda de origem padrão
+                toCurrency.value = 'EUR'; // Moeda de destino padrão
+                
             } catch (error) {
                 resultDiv.textContent = 'Failed to load currencies. Please try again later.';
             }
