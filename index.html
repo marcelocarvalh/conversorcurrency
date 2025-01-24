@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .converter {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+        .converter h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .converter label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .converter input, .converter select, .converter button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .converter button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .converter button:hover {
+            background: #0056b3;
+        }
+        .result {
+            font-size: 16px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter">
+        <h1>Currency Converter</h1>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" placeholder="Enter amount" required>
+
+        <label for="from-currency">From:</label>
+        <select id="from-currency">
+            <!-- Options will be populated dynamically -->
+        </select>
+
+        <label for="to-currency">To:</label>
+        <select id="to-currency">
+            <!-- Options will be populated dynamically -->
+        </select>
+
+        <button id="convert">Convert</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const apiKey = '70b22af1f12a9d0ff553cee4208f5630'; // Replace with your Exchange Rates API key
+        const apiURL = 'https://api.apilayer.com/exchangerates_data/latest';
+
+        const amountInput = document.getElementById('amount');
+        const fromCurrency = document.getElementById('from-currency');
+        const toCurrency = document.getElementById('to-currency');
+        const convertButton = document.getElementById('convert');
+        const resultDiv = document.getElementById('result');
+
+        async function fetchCurrencies() {
+            try {
+                const response = await fetch(apiURL, {
+                    headers: {
+                        'apikey': apiKey
+                    }
+                });
+                const data = await response.json();
+                const currencies = Object.keys(data.rates);
+
+                currencies.forEach(currency => {
+                    const optionFrom = document.createElement('option');
+                    optionFrom.value = currency;
+                    optionFrom.textContent = currency;
+                    fromCurrency.appendChild(optionFrom);
+
+                    const optionTo = document.createElement('option');
+                    optionTo.value = currency;
+                    optionTo.textContent = currency;
+                    toCurrency.appendChild(optionTo);
+                });
+            } catch (error) {
+                resultDiv.textContent = 'Failed to load currencies. Please try again later.';
+            }
+        }
+
+        async function convertCurrency() {
+            const amount = parseFloat(amountInput.value);
+            const from = fromCurrency.value;
+            const to = toCurrency.value;
+
+            if (isNaN(amount) || amount <= 0) {
+                resultDiv.textContent = 'Please enter a valid amount.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiURL}?base=${from}&symbols=${to}`, {
+                    headers: {
+                        'apikey': apiKey
+                    }
+                });
+                const data = await response.json();
+                const rate = data.rates[to];
+                const convertedAmount = (amount * rate).toFixed(2);
+
+                resultDiv.textContent = `${amount} ${from} = ${convertedAmount} ${to}`;
+            } catch (error) {
+                resultDiv.textContent = 'Conversion failed. Please try again.';
+            }
+        }
+
+        // Initialize the app
+        fetchCurrencies();
+        convertButton.addEventListener('click', convertCurrency);
+    </script>
+</body>
+</html>
